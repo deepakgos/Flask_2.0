@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Bot</title>
+    <style>
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+        }
+
+
+ 
+
+        #chat-container {
+
+            max-width: 800px;
+
+            margin: 0 auto;
+
+            padding: 20px;
+
+        }
+
+
+ 
+
+        h1 {
+
+            text-align: center;
+
+        }
+
+
+ 
+
+        label {
+
+            font-weight: bold;
+
+        }
+
+
+ 
+
+        .input-group {
+
+            margin-bottom: 10px;
+
+        }
+
+
+ 
+
+        .conversation-container {
+
+            margin-top: 20px;
+
+            max-height: 300px;
+
+            overflow-y: scroll;
+
+        }
+
+
+ 
+
+        .conversation-entry {
+
+            margin-bottom: 10px;
+
+        }
+
+
+ 
+
+        .conversation-entry .timestamp {
+
+            font-size: 10px;
+
+            color: #888;
+
+        }
+
+
+ 
+
+        .conversation-entry .question {
+
+            font-weight: bold;
+
+        }
+
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h1>Chat Bot</h1>
+        <div class="input-group">
+            <label for="question-input">Question:</label>
+            <input type="text" id="question-input" size="50">
+        </div>
+        <button id="chat-button">Chat</button>
+        <div class="conversation-container" id="conversation-container"></div>
+        <button id="clear-button">Clear Conversation</button>
+        <button id="copy-button">Copy Answer</button>
+    </div>
+
+    <script>
+        // Add your JavaScript code here
+        // Make AJAX request to Flask server
+
+        var chatButton = document.getElementById('chat-button');
+        var questionInput = document.getElementById('question-input');
+        var conversationContainer = document.getElementById('conversation-container');
+        var clearButton = document.getElementById('clear-button');
+        var copyButton = document.getElementById('copy-button');
+
+        chatButton.addEventListener('click', askQuestion);
+        clearButton.addEventListener('click', clearConversation);
+        copyButton.addEventListener('click', copyAnswer);
+
+        function askQuestion() {
+            var question = questionInput.value.trim();
+            if (!question) {
+                alert('Please enter a question.');
+                return;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/ask');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText).response;
+                    addConversationEntry(question, response);
+                    questionInput.value = '';
+                } else {
+                    alert('Error: ' + xhr.statusText);
+                }
+            };
+            xhr.send('question=' + encodeURIComponent(question));
+        }
+
+        function clearConversation() {
+            conversationContainer.innerHTML = '';
+        }
+
+        function copyAnswer() {
+            var selectedEntry = document.querySelector('.conversation-entry.selected');
+            if (!selectedEntry) {
+                alert('Please select a conversation entry.');
+                return;
+            }
+
+            var answer = selectedEntry.querySelector('.answer').textContent;
+            navigator.clipboard.writeText(answer).then(function () {
+                alert('The answer has been copied to the clipboard.');
+            });
+        }
+
+        function addConversationEntry(question, answer) {
+            var timestamp = new Date().toLocaleString();
+            var entry = document.createElement('div');
+            entry.classList.add('conversation-entry');
+            entry.innerHTML = `
+                <div class="timestamp">${timestamp}</div>
+                <div class="question">${question}</div>
+                <div class="answer">${answer}</div>
+            `;
+            entry.addEventListener('click', function () {
+                entry.classList.toggle('selected');
+            });
+            conversationContainer.appendChild(entry);
+        }
+    </script>
+</body>
+</html>
