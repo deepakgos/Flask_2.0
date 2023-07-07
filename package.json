@@ -1,0 +1,13 @@
+{
+    "name": "Python bot",
+    "version": "1.0.0",
+    "description": "Description of your Flask application",
+    "main": "app.py",
+    "scripts": {
+      "start": "python app.py"
+    },
+    "dependencies": {
+      "express": "^4.17.1"
+    }
+  }
+  
